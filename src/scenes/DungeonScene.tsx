@@ -1,9 +1,12 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import { useDungeonStore } from '../stores/dungeonStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { Box } from '@react-three/drei';
 import type { DungeonFloor, DungeonRoom, Corridor } from '../types/dungeon';
+import type { EnemyInstance } from '../types/enemy';
+import { Enemy } from './Enemy';
+import { Projectile } from './Projectile';
 
 const WALL_THICKNESS = 0.2;
 const WALL_HEIGHT = 3;
@@ -11,6 +14,17 @@ const FLOOR_THICKNESS = 0.2;
 
 interface DungeonSceneProps {
   playerRigidBodyRef: React.MutableRefObject<RapierRigidBody | null>;
+  enemiesRef: React.MutableRefObject<Map<string, EnemyInstance>>;
+  onPlayerHit: (damage: number) => void;
+}
+
+interface ProjectileData {
+  id: string;
+  startPos: [number, number, number];
+  direction: [number, number, number];
+  speed: number;
+  lifetime: number;
+  damage: number;
 }
 
 export function DungeonScene({ playerRigidBodyRef }: DungeonSceneProps) {
@@ -18,25 +32,55 @@ export function DungeonScene({ playerRigidBodyRef }: DungeonSceneProps) {
   const currentFloorNum = usePlayerStore((s) => s.currentFloor);
   const setCurrentFloor = usePlayerStore((s) => s.setCurrentFloor);
   const setDungeon = useDungeonStore((s) => s.setCurrentFloor);
+  const [projectiles, setProjectiles] = useState<ProjectileData[]>([]);
+  const projectileIdCounter = useRef(0);
+  
+
+  // Cleanup enemies map when floor changes
+  useEffect(() => {
+    enemiesRef.current.clear();
+  }, [currentFloorNum, enemiesRef]);
 
   const handleExit = useCallback(() => {
     const nextFloor = currentFloorNum + 1;
     setCurrentFloor(nextFloor);
-    // Regenerate dungeon with the same seed but different floor number
     import('../systems/dungeonGenerator').then(({ generateDungeon }) => {
       const newFloor = generateDungeon(nextFloor, 'dungeon-seed');
       setDungeon(newFloor);
-      // Reset player position to the new start room
       const startRoom = newFloor.rooms.find((r) => r.id === newFloor.startRoomId);
       if (startRoom && playerRigidBodyRef.current) {
         const { x, z } = startRoom.position;
         playerRigidBodyRef.current.setTranslation({ x, y: 1, z }, true);
-        // Also update store
         usePlayerStore.getState().setPlayerPosition([x, 1, z]);
       }
     });
   }, [currentFloorNum, setCurrentFloor, setDungeon, playerRigidBodyRef]);
 
+  const handleEnemyDeath = useCallback((instanceId: string) => {
+    enemiesRef.current.delete(instanceId);
+  }, [enemiesRef]);
+
+  const handleProjectileSpawn = useCallback((pos: [number, number, number], dir: [number, number, number]) => {
+    const id = `proj_${projectileIdCounter.current++}`;
+    setProjectiles((prev) => [...prev, {
+      id,
+      startPos: pos,
+      direction: dir,
+      speed: 5,
+      lifetime: 3,
+      damage: 8,
+    }]);
+  }, []);
+
+  const handleProjectileExpire = useCallback((id: string) => {
+    setProjectiles((prev) => prev.filter(p => p.id !== id));
+  }, []);
+
+  const handleProjectileHit = useCallback((id: string, damage: number) => {
+    onPlayerHit(damage);
+    setProjectiles((prev) => prev.filter(p => p.id !== id));
+  }, [onPlayerHit]);
+  
   if (!currentFloor) return null;
 
   return (
@@ -56,6 +100,38 @@ export function DungeonScene({ playerRigidBodyRef }: DungeonSceneProps) {
         exitRoom={currentFloor.rooms.find((r) => r.id === currentFloor.exitRoomId)}
         onEnter={handleExit}
       />
+      {/* Enemies */}
+      {currentFloor.rooms.map((room) =>
+        room.enemies?.map((enemy) => {
+          if (enemy.state === 'dead') return null;
+          // Register in map
+          enemiesRef.current.set(enemy.instanceId, enemy);
+          return (
+            <Enemy
+              key={enemy.instanceId}
+              enemyData={enemy}
+              playerPos={usePlayerStore.getState().playerPosition}
+              onDeath={handleEnemyDeath}
+              onProjectileSpawn={handleProjectileSpawn}
+              onAttackPlayer={onPlayerHit}
+            />
+          );
+        })
+      )}
+      {/* Projectiles */}
+      {projectiles.map((proj) => (
+        <Projectile
+          key={proj.id}
+          id={proj.id}
+          startPos={proj.startPos}
+          direction={proj.direction}
+          speed={proj.speed}
+          lifetime={proj.lifetime}
+          damage={proj.damage}
+          onHit={handleProjectileHit}
+          onExpire={handleProjectileExpire}
+        />
+      ))} 
     </group>
   );
 }

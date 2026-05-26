@@ -1,4 +1,5 @@
 import type { DungeonFloor, DungeonRoom, Corridor } from '../types/dungeon';
+import type { EnemyInstance } from '../types/enemy';
 import { createRNG, hashSeed } from '../utils/random';
 
 /**
@@ -101,7 +102,31 @@ export function generateDungeon(floorNumber: number, seed: string): DungeonFloor
       corridors.push({ points, width: 1.5 });
     }
   }
-
+  // 4. Place enemies in rooms (except start room)
+  for (const room of rooms) {
+    if (room.type === 'start') continue;
+    const enemyCount = room.type === 'exit' ? 1 : Math.floor(rng() * 2) + 1;
+    room.enemies = [];
+    for (let j = 0; j < enemyCount; j++) {
+      const templateType = rng() > 0.5 ? 'melee_grunt' : 'ranger_orb';
+      const hp = templateType === 'melee_grunt' ? 30 : 20;
+      room.enemies.push({
+        instanceId: `${room.id}_enemy_${j}`,
+        templateType,
+        hp,
+        maxHp: hp,
+        state: 'idle',
+        position: [
+          room.position.x + (rng() - 0.5) * (room.size.width - 2),
+          1,
+          room.position.z + (rng() - 0.5) * (room.size.depth - 2),
+        ],
+        rotation: 0,
+        lastAttackTime: 0,
+        spawnRoomId: room.id,
+      });
+    }
+  }
   return {
     floorNumber,
     seed,
