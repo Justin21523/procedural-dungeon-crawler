@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# Procedural Dungeon Crawler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-performance 3D first-person dungeon crawler built with modern web technologies. Explore procedurally generated dungeons, battle physics-driven enemies, and descend deeper into the abyss.
 
-Currently, two official plugins are available:
+![Game Screenshot](./public/screenshot.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Features
 
-## React Compiler
+- **Procedural Dungeon Generation:** Every run is unique with randomly generated layouts, rooms, and enemy placements.
+- **Physics-Based Combat:** Real-time combat system using `@react-three/rapier` for satisfying collisions and projectiles.
+- **Dynamic Enemy AI:** Encounter both melee and ranged enemies with distinct AI behaviors.
+- **First-Person Experience:** Smooth 3D controls with mouse-lock and responsive movement.
+- **Progression System:** Navigate through multiple floors with increasing difficulty.
+- **Modern HUD:** Built with Tailwind CSS and Framer Motion for a sleek gaming interface.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+- **Framework:** [React 19](https://react.dev/)
+- **3D Engine:** [Three.js](https://threejs.org/) via [@react-three/fiber](https://r3f.docs.pmnd.rs/)
+- **Physics:** [@react-three/rapier](https://pmndrs.github.io/react-three-rapier/)
+- **State Management:** [Zustand](https://zustand-demo.pmnd.rs/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🎮 Controls
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Action | Control |
+|--------|---------|
+| Move | `W` `A` `S` `D` |
+| Look | `Mouse` |
+| Attack | `Left Click` |
+| Lock Mouse | `Click on Screen` |
+| Unlock Mouse | `ESC` |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 📦 Installation & Setup
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Justin21523/procedural-dungeon-crawler.git
+   cd procedural-dungeon-crawler
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. **Start development server:**
+   ```bash
+   npm run dev
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+## 🏗️ Project Structure
+
+- `src/systems/`: Core logic for dungeon generation and AI.
+- `src/scenes/`: React Three Fiber components for the 3D world.
+- `src/stores/`: Zustand state management for game state.
+- `src/hooks/`: Custom hooks for combat, camera, and input.
+- `src/types/`: TypeScript definitions for game entities.
+
+## 📄 License
+
+This project is open source and available under the MIT License.
