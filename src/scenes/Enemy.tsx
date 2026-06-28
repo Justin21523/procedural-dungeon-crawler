@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { RigidBody, CuboidCollider, SphereCollider } from '@react-three/rapier';
+import { RigidBody, CuboidCollider, BallCollider } from '@react-three/rapier';
 import { Box, Sphere } from '@react-three/drei';
 import type { EnemyInstance } from '../types/enemy';
 import { enemyTemplates } from '../data/enemyTemplates';
@@ -78,7 +78,7 @@ export function Enemy({ enemyData, playerRigidBodyRef, onDeath, onProjectileSpaw
       {template.geometry === 'box' ? (
         <CuboidCollider args={template.scale.map((s) => s / 2) as [number, number, number]} />
       ) : (
-        <SphereCollider args={[template.scale[0] / 2]} />
+        <BallCollider args={[template.scale[0] / 2]} />
       )}
       <Geometry args={template.scale} castShadow>
         <meshStandardMaterial color={template.color} />

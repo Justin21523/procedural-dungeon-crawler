@@ -6,7 +6,7 @@ import { Box } from '@react-three/drei';
 import type { DungeonFloor, DungeonRoom, Corridor } from '../types/dungeon';
 import type { EnemyInstance } from '../types/enemy';
 import { Enemy } from './Enemy';
-import { Projectile } from './Projectile';
+import { Projectile } from './projectile';
 
 const WALL_THICKNESS = 0.2;
 const WALL_HEIGHT = 3;
@@ -27,7 +27,7 @@ interface ProjectileData {
   damage: number;
 }
 
-export function DungeonScene({ playerRigidBodyRef }: DungeonSceneProps) {
+export function DungeonScene({ playerRigidBodyRef, enemiesRef, onPlayerHit }: DungeonSceneProps) {
   const currentFloor = useDungeonStore((s) => s.currentFloor);
   const currentFloorNum = usePlayerStore((s) => s.currentFloor);
   const setCurrentFloor = usePlayerStore((s) => s.setCurrentFloor);
@@ -110,7 +110,7 @@ export function DungeonScene({ playerRigidBodyRef }: DungeonSceneProps) {
             <Enemy
               key={enemy.instanceId}
               enemyData={enemy}
-              playerPos={usePlayerStore.getState().playerPosition}
+              playerRigidBodyRef={playerRigidBodyRef}
               onDeath={handleEnemyDeath}
               onProjectileSpawn={handleProjectileSpawn}
               onAttackPlayer={onPlayerHit}
